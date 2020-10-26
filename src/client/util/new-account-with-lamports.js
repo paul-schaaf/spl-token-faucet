@@ -1,13 +1,11 @@
-// @flow
-
-import {Account, Connection} from '@solana/web3.js';
+import {Account} from '@solana/web3.js';
 
 import {sleep} from './sleep';
 
 export async function newAccountWithLamports(
-  connection: Connection,
-  lamports: number = 1000000,
-): Promise<Account> {
+  connection,
+  lamports = 1000000,
+) {
   const account = new Account();
 
   let retries = 10;

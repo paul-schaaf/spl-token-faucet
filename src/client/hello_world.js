@@ -1,5 +1,3 @@
-// @flow
-
 import {
   Account,
   Connection,
@@ -22,22 +20,22 @@ import {sendAndConfirmTransaction} from './util/send-and-confirm-transaction';
 /**
  * Connection to the network
  */
-let connection: Connection;
+let connection;
 
 /**
  * Connection to the network
  */
-let payerAccount: Account;
+let payerAccount;
 
 /**
  * Hello world's program id
  */
-let programId: PublicKey;
+let programId;
 
 /**
  * The public key of the account we are saying hello to
  */
-let greetedPubkey: PublicKey;
+let greetedPubkey;
 
 const pathToProgram = 'dist/program/solana_escrow.so';
 
@@ -51,7 +49,7 @@ const greetedAccountDataLayout = BufferLayout.struct([
 /**
  * Establish a connection to the cluster
  */
-export async function establishConnection(): Promise<void> {
+export async function establishConnection() {
   connection = new Connection(url, 'recent');
   const version = await connection.getVersion();
   console.log('Connection to cluster established:', url, version);
@@ -60,7 +58,7 @@ export async function establishConnection(): Promise<void> {
 /**
  * Establish an account to pay for everything
  */
-export async function establishPayer(): Promise<void> {
+export async function establishPayer() {
   if (!payerAccount) {
     let fees = 0;
     const {feeCalculator} = await connection.getRecentBlockhash();
@@ -98,7 +96,7 @@ export async function establishPayer(): Promise<void> {
 /**
  * Load the hello world BPF program if not already loaded
  */
-export async function loadProgram(): Promise<void> {
+export async function loadProgram() {
   const store = new Store();
 
   // Check if the program has already been loaded
@@ -163,7 +161,7 @@ export async function loadProgram(): Promise<void> {
 /**
  * Say hello
  */
-export async function sayHello(): Promise<void> {
+export async function sayHello() {
   console.log('Saying hello to', greetedPubkey.toBase58());
   const instruction = new TransactionInstruction({
     keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
@@ -181,7 +179,7 @@ export async function sayHello(): Promise<void> {
 /**
  * Report the number of times the greeted account has been said hello to
  */
-export async function reportHellos(): Promise<void> {
+export async function reportHellos() {
   const accountInfo = await connection.getAccountInfo(greetedPubkey);
   if (accountInfo === null) {
     throw 'Error: cannot find the greeted account';

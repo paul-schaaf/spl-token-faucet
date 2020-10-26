@@ -1,9 +1,3 @@
-/**
- * Hello world
- *
- * @flow
- */
-
 import {
   establishConnection,
   establishPayer,
