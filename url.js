@@ -4,7 +4,7 @@
 import {clusterApiUrl, Cluster} from '@solana/web3.js';
 import dotenv from 'dotenv';
 
-function chooseCluster(): Cluster | undefined {
+function chooseCluster() {
   dotenv.config();
   if (!process.env.LIVE) return;
   switch (process.env.CLUSTER) {
