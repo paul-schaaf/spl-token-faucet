@@ -1452,6 +1452,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "solana-escrow"
+version = "0.0.1"
+dependencies = [
+ "byteorder",
+ "solana-sdk",
+]
+
+[[package]]
 name = "solana-logger"
 version = "1.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1528,13 +1536,6 @@ dependencies = [
  "quote 1.0.7",
  "rustc_version",
  "syn 1.0.48",
-]
-
-[[package]]
-name = "solana_escrow"
-version = "0.0.1"
-dependencies = [
- "solana-sdk",
 ]
 
 [[package]]
