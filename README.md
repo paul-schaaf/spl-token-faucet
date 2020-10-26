@@ -1,1 +1,1 @@
-# solana-escrow
+# solana_escrow
