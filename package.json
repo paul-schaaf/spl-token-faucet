@@ -7,7 +7,7 @@
     "url": "https://github.com/paul-schaaf/solana-escrow"
   },
   "keywords": [],
-  "author": "",
+  "author": "Paul",
   "license": "MIT",
   "testnetDefaultChannel": "v1.3.17",
   "scripts": {
@@ -31,14 +31,12 @@
   "devDependencies": {
     "@babel/cli": "^7.12.1",
     "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1",
-    "prettier": "^2.0.2"
+    "@babel/preset-env": "^7.12.1"
   },
   "dependencies": {
     "@solana/web3.js": "^0.84.0",
     "buffer-layout": "^1.2.0",
     "dotenv": "8.2.0",
-    "json-to-pretty-yaml": "^1.2.2",
     "mz": "^2.7.0"
   },
   "engines": {
