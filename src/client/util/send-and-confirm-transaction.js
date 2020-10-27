@@ -1,4 +1,4 @@
-import {sendAndConfirmTransaction as realSendAndConfirmTransaction} from '@solana/web3.js';
+import { sendAndConfirmTransaction as realSendAndConfirmTransaction } from "@solana/web3.js";
 
 export async function sendAndConfirmTransaction(
   title,
@@ -6,14 +6,9 @@ export async function sendAndConfirmTransaction(
   transaction,
   ...signers
 ) {
-  await realSendAndConfirmTransaction(
-    connection,
-    transaction,
-    signers,
-    {
-      skipPreflight: true,
-      commitment: 'singleGossip',
-      preflightCommitment: null,
-    },
-  );
+  await realSendAndConfirmTransaction(connection, transaction, signers, {
+    skipPreflight: true,
+    commitment: "singleGossip",
+    preflightCommitment: null,
+  });
 }

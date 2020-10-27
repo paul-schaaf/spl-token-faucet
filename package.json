@@ -11,6 +11,7 @@
   "license": "MIT",
   "testnetDefaultChannel": "v1.3.17",
   "scripts": {
+    "lint": "eslint . --fix",
     "build:client": "babel src/client -d dist/client",
     "start": "npm run build:client && node dist/client/main.js",
     "bpf-sdk:update": "solana-bpf-sdk-install node_modules/@solana/web3.js && npm run clean",
@@ -31,12 +32,17 @@
   "devDependencies": {
     "@babel/cli": "^7.12.1",
     "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1"
+    "@babel/preset-env": "^7.12.1",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.12.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "^2.1.2"
   },
   "dependencies": {
     "@solana/web3.js": "^0.84.0",
     "buffer-layout": "^1.2.0",
-    "dotenv": "8.2.0",
+    "dotenv": "^8.2.0",
     "mz": "^2.7.0"
   },
   "engines": {

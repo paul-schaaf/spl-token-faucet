@@ -1,0 +1,21 @@
+{
+    "extends": [
+        "plugin:prettier/recommended",
+        "eslint:recommended"
+    ],
+    "env": {
+        "node":true,
+        "es6": true
+    },
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "sourceType": "module",
+        "allowImportExportEverywhere": false,
+        "ecmaFeatures": {
+            "globalReturn": false
+        },
+        "babelOptions": {
+            "configFile": "./babel.config.json"
+        }
+    }
+}

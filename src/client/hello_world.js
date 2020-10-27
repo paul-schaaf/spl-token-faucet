@@ -3,18 +3,17 @@ import {
   Connection,
   BpfLoader,
   BPF_LOADER_PROGRAM_ID,
-  PublicKey,
   LAMPORTS_PER_SOL,
   SystemProgram,
   TransactionInstruction,
   Transaction,
-} from '@solana/web3.js';
-import fs from 'mz/fs';
-import * as BufferLayout from 'buffer-layout';
+} from "@solana/web3.js";
+import fs from "mz/fs";
+import * as BufferLayout from "buffer-layout";
 
-import {url} from './url';
-import {newAccountWithLamports} from './util/new-account-with-lamports';
-import {sendAndConfirmTransaction} from './util/send-and-confirm-transaction';
+import { url } from "./url";
+import { newAccountWithLamports } from "./util/new-account-with-lamports";
+import { sendAndConfirmTransaction } from "./util/send-and-confirm-transaction";
 
 /**
  * Connection to the network
@@ -36,22 +35,22 @@ let programId;
  */
 let greetedPubkey;
 
-const pathToProgram = 'dist/program/solana_escrow.so';
+const pathToProgram = "dist/program/solana_escrow.so";
 
 /**
  * Layout of the greeted account data
  */
 const greetedAccountDataLayout = BufferLayout.struct([
-  BufferLayout.u32('numGreets'),
+  BufferLayout.u32("numGreets"),
 ]);
 
 /**
  * Establish a connection to the cluster
  */
 export async function establishConnection() {
-  connection = new Connection(url, 'recent');
+  connection = new Connection(url, "singleGossip");
   const version = await connection.getVersion();
-  console.log('Connection to cluster established:', url, version);
+  console.log("Connection to cluster established:", url, version);
 }
 
 /**
@@ -60,7 +59,7 @@ export async function establishConnection() {
 export async function establishPayer() {
   if (!payerAccount) {
     let fees = 0;
-    const {feeCalculator} = await connection.getRecentBlockhash();
+    const { feeCalculator } = await connection.getRecentBlockhash();
 
     // Calculate the cost to load the program
     const data = await fs.readFile(pathToProgram);
@@ -72,7 +71,7 @@ export async function establishPayer() {
 
     // Calculate the cost to fund the greeter account
     fees += await await connection.getMinimumBalanceForRentExemption(
-      greetedAccountDataLayout.span,
+      greetedAccountDataLayout.span
     );
 
     // Calculate the cost of sending the transactions
@@ -84,11 +83,11 @@ export async function establishPayer() {
 
   const lamports = await connection.getBalance(payerAccount.publicKey);
   console.log(
-    'Using account',
+    "Using account",
     payerAccount.publicKey.toBase58(),
-    'containing',
+    "containing",
     lamports / LAMPORTS_PER_SOL,
-    'Sol to pay for fees',
+    "Sol to pay for fees"
   );
 }
 
@@ -97,7 +96,7 @@ export async function establishPayer() {
  */
 export async function loadProgram() {
   // Load the program
-  console.log('Loading hello world program...');
+  console.log("Loading hello world program...");
   const data = await fs.readFile(pathToProgram);
   const programAccount = new Account();
   await BpfLoader.load(
@@ -105,18 +104,18 @@ export async function loadProgram() {
     payerAccount,
     programAccount,
     data,
-    BPF_LOADER_PROGRAM_ID,
+    BPF_LOADER_PROGRAM_ID
   );
   programId = programAccount.publicKey;
-  console.log('Program loaded to account', programId.toBase58());
+  console.log("Program loaded to account", programId.toBase58());
 
   // Create the greeted account
   const greetedAccount = new Account();
   greetedPubkey = greetedAccount.publicKey;
-  console.log('Creating account', greetedPubkey.toBase58(), 'to say hello to');
+  console.log("Creating account", greetedPubkey.toBase58(), "to say hello to");
   const space = greetedAccountDataLayout.span;
   const lamports = await connection.getMinimumBalanceForRentExemption(
-    greetedAccountDataLayout.span,
+    greetedAccountDataLayout.span
   );
   const transaction = new Transaction().add(
     SystemProgram.createAccount({
@@ -125,14 +124,14 @@ export async function loadProgram() {
       lamports,
       space,
       programId,
-    }),
+    })
   );
   await sendAndConfirmTransaction(
-    'createAccount',
+    "createAccount",
     connection,
     transaction,
     payerAccount,
-    greetedAccount,
+    greetedAccount
   );
 }
 
@@ -140,17 +139,17 @@ export async function loadProgram() {
  * Say hello
  */
 export async function sayHello() {
-  console.log('Saying hello to', greetedPubkey.toBase58());
+  console.log("Saying hello to", greetedPubkey.toBase58());
   const instruction = new TransactionInstruction({
-    keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
+    keys: [{ pubkey: greetedPubkey, isSigner: false, isWritable: true }],
     programId,
     data: Buffer.alloc(0), // All instructions are hellos
   });
   await sendAndConfirmTransaction(
-    'sayHello',
+    "sayHello",
     connection,
     new Transaction().add(instruction),
-    payerAccount,
+    payerAccount
   );
 }
 
@@ -160,13 +159,13 @@ export async function sayHello() {
 export async function reportHellos() {
   const accountInfo = await connection.getAccountInfo(greetedPubkey);
   if (accountInfo === null) {
-    throw 'Error: cannot find the greeted account';
+    throw "Error: cannot find the greeted account";
   }
   const info = greetedAccountDataLayout.decode(Buffer.from(accountInfo.data));
   console.log(
     greetedPubkey.toBase58(),
-    'has been greeted',
+    "has been greeted",
     info.numGreets.toString(),
-    'times',
+    "times"
   );
 }
