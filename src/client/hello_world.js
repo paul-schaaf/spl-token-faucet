@@ -12,8 +12,7 @@ import {
 import fs from 'mz/fs';
 import * as BufferLayout from 'buffer-layout';
 
-import {url, urlTls} from '../../url';
-import {Store} from './util/store';
+import {url} from './url';
 import {newAccountWithLamports} from './util/new-account-with-lamports';
 import {sendAndConfirmTransaction} from './util/send-and-confirm-transaction';
 
@@ -97,20 +96,6 @@ export async function establishPayer() {
  * Load the hello world BPF program if not already loaded
  */
 export async function loadProgram() {
-  const store = new Store();
-
-  // Check if the program has already been loaded
-  try {
-    let config = await store.load('config.json');
-    programId = new PublicKey(config.programId);
-    greetedPubkey = new PublicKey(config.greetedPubkey);
-    await connection.getAccountInfo(programId);
-    console.log('Program already loaded to account', programId.toBase58());
-    return;
-  } catch (err) {
-    // try to load the program
-  }
-
   // Load the program
   console.log('Loading hello world program...');
   const data = await fs.readFile(pathToProgram);
@@ -149,13 +134,6 @@ export async function loadProgram() {
     payerAccount,
     greetedAccount,
   );
-
-  // Save this info for next time
-  await store.save('config.json', {
-    url: urlTls,
-    programId: programId.toBase58(),
-    greetedPubkey: greetedPubkey.toBase58(),
-  });
 }
 
 /**
