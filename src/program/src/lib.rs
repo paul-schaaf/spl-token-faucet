@@ -11,6 +11,8 @@ use solana_sdk::{
 };
 use std::mem;
 
+mod instruction;
+
 // Declare and export the program's entrypoint
 entrypoint!(process_instruction);
 
