@@ -10,6 +10,8 @@ pub enum EscrowError {
     /// Invalid instruction
     #[error("Invalid Instruction")]
     InvalidInstruction,
+    #[error("Missing Initialization Data")]
+    MissingInitializationData,
 }
 
 impl From<EscrowError> for ProgramError {

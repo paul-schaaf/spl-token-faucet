@@ -1455,6 +1455,7 @@ dependencies = [
 name = "solana-escrow"
 version = "0.0.1"
 dependencies = [
+ "arrayref",
  "num-derive",
  "num-traits",
  "solana-sdk",
