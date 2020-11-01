@@ -10,6 +10,7 @@ pub enum EscrowError {
     /// Invalid instruction
     #[error("Invalid Instruction")]
     InvalidInstruction,
+    /// Missing initialization data
     #[error("Missing Initialization Data")]
     MissingInitializationData,
 }

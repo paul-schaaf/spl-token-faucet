@@ -8,12 +8,13 @@ use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 
 use crate::error::EscrowError;
 
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Escrow {
-    is_initialized: bool,
-    initializer_pubkey: Pubkey,
-    sending_token_account_pubkey: Pubkey,
-    receiving_token_account_pubkey: Pubkey,
-    expected_amount: u64,
+    pub is_initialized: bool,
+    pub initializer_pubkey: Pubkey,
+    pub sending_token_account_pubkey: Pubkey,
+    pub receiving_token_account_pubkey: Pubkey,
+    pub expected_amount: u64,
 }
 
 impl Sealed for Escrow {}
