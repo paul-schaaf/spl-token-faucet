@@ -1,13 +1,6 @@
 //! Program entrypoint
 
-#![cfg(feature = "program")]
 #![cfg(not(feature = "no-entrypoint"))]
-
-use solana_sdk::{
-    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult,
-    program_error::PrintProgramError, pubkey::Pubkey, info
-};
-use crate::{error::EscrowError, processor::Processor};
 
 // Declare and export the program's entrypoint
 entrypoint!(process_instruction);

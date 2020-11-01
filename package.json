@@ -9,18 +9,18 @@
   "keywords": [],
   "author": "Paul",
   "license": "MIT",
-  "testnetDefaultChannel": "v1.3.17",
+  "testnetDefaultChannel": "v1.4.4",
   "scripts": {
     "lint": "eslint . --fix",
     "build:client": "babel src/client -d dist/client",
+    "clean:client": "rm -rf dist/client && rm -rf store",
     "deploy": "npm run build:client && node dist/client/deploy.js",
-    "bpf-sdk:update": "solana-bpf-sdk-install node_modules/@solana/web3.js && npm run clean",
-    "clean": "npm run clean:program",
-    "build:program": "./src/program/do.sh build",
-    "clippy": "./src/program/do.sh clippy",
-    "fmt": "./src/program/do.sh fmt",
-    "clean:program": "./src/program/do.sh clean && rm -rf ./dist",
-    "test:program": "./src/program/do.sh test",
+    "clean": "npm run clean:program && npm run clean:client && rm -rf dist",
+    "build:program": "cd src/program && cargo build-bpf && cd $INIT_CWD && rm -rf dist && mkdir dist && mkdir dist/program && mv src/program/solana_escrow.so dist/program/solana_escrow.so",
+    "clippy": "cd src/program && cargo clippy",
+    "fmt": "cd src/program && cargo fmt",
+    "clean:program": "cd src/program && cargo clean && cd $INIT_CWD && rm -rf dist/program",
+    "test:program": "cd src/program && cargo test",
     "cluster:localnet": "npm run clean:store && rm -f .env",
     "cluster:devnet": "npm run clean:store && cp cluster-devnet.env .env",
     "cluster:testnet": "npm run clean:store && cp cluster-testnet.env .env",
@@ -28,8 +28,7 @@
     "localnet:update": "solana-localnet update",
     "localnet:up": "set -x; solana-localnet down; set -e; solana-localnet up",
     "localnet:down": "solana-localnet down",
-    "localnet:logs": "solana-localnet logs -f",
-    "postinstall": "npm run bpf-sdk:update && cargo update --manifest-path=src/program/Cargo.toml"
+    "localnet:logs": "solana-localnet logs -f"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",
@@ -43,7 +42,7 @@
     "prettier": "^2.1.2"
   },
   "dependencies": {
-    "@solana/web3.js": "^0.84.0",
+    "@solana/web3.js": "^0.86.2",
     "buffer-layout": "^1.2.0",
     "dotenv": "^8.2.0",
     "mkdirp-promise": "^5.0.1",

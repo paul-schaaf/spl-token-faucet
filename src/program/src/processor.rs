@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use solana_sdk::{
+use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     info,
@@ -117,7 +117,7 @@ impl Processor {
         let pdas_temp_token_account = next_account_info(account_info_iter)?;
         let pdas_temp_token_account_info =
             TokenAccount::unpack(&pdas_temp_token_account.data.borrow())?;
-        let (pda, nonce) = Pubkey::find_program_address(&[&"escrow".as_bytes()], program_id);
+        let (pda, nonce) = Pubkey::find_program_address(&[b"escrow"], program_id);
 
         if pdas_temp_token_account_info.owner != pda {
             return Err(TokenError::OwnerMismatch.into());

@@ -3,7 +3,7 @@
 use num_derive::FromPrimitive;
 use thiserror::Error;
 
-use solana_sdk::{decode_error::DecodeError, program_error::ProgramError};
+use solana_program::{decode_error::DecodeError, program_error::ProgramError};
 
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
 pub enum EscrowError {

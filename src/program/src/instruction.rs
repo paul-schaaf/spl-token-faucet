@@ -1,7 +1,7 @@
 //! Instruction types
 
 use crate::error::{EscrowError, EscrowError::InvalidInstruction};
-use solana_sdk::program_error::ProgramError;
+use solana_program::program_error::ProgramError;
 use std::convert::TryInto;
 
 pub enum EscrowInstruction {
