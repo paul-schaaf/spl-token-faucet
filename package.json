@@ -13,7 +13,7 @@
   "scripts": {
     "lint": "eslint . --fix",
     "build:client": "babel src/client -d dist/client",
-    "start": "npm run build:client && node dist/client/main.js",
+    "deploy": "npm run build:client && node dist/client/deploy.js",
     "bpf-sdk:update": "solana-bpf-sdk-install node_modules/@solana/web3.js && npm run clean",
     "clean": "npm run clean:program",
     "build:program": "./src/program/do.sh build",
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@babel/cli": "^7.12.1",
     "@babel/core": "^7.12.3",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.12.1",
@@ -45,6 +46,7 @@
     "@solana/web3.js": "^0.84.0",
     "buffer-layout": "^1.2.0",
     "dotenv": "^8.2.0",
+    "mkdirp-promise": "^5.0.1",
     "mz": "^2.7.0"
   },
   "engines": {
