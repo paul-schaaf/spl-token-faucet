@@ -5,7 +5,7 @@ use solana_sdk::program_error::ProgramError;
 use std::convert::TryInto;
 
 pub enum EscrowInstruction {
-    /// Starts the trade by creating and populating an escrow account and transferring ownership of the given temp token account to the DPA
+    /// Starts the trade by creating and populating an escrow account and transferring ownership of the given temp token account to the PDA
     ///
     ///
     /// Accounts expected:
@@ -26,9 +26,12 @@ pub enum EscrowInstruction {
     /// Accounts expected:
     ///
     /// 0. `[signer]` The account of the person taking the trade
-    /// 1. `[writable]` Tempory token account of the token that will be sent by the taker
-    /// 2. `[]` The taker's token account for the token they will receive should the trade go through
-    /// 3. `[writable]` The escrow account created by the initializer to hold the escrow info
+    /// 1. `[writable]` Taker's temporary token account that will be closed
+    /// 2. `[writable]` The taker's token account for the token they will receive should the trade go through
+    /// 3. `[writable]` The PDA's temp token account to get tokens from and eventually close
+    /// 4. `[writable]` The creator's main account to send their rent fees to
+    /// 5. `[writable]` The creator's token account that will receive tokens
+    /// 5. `[writable]` The escrow account holding the escrow info
     Exchange {
         /// the amount the taker expects to be paid in the other token, as a u64 because that's the max possible supply of a token
         amount: u64,

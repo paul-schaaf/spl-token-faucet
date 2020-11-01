@@ -13,6 +13,12 @@ pub enum EscrowError {
     /// Missing initialization data
     #[error("Missing Initialization Data")]
     MissingInitializationData,
+    /// Expected funds mismatch
+    #[error("Expected Funds Mismatch")]
+    ExpectedFundsMismatch,
+    /// Unknown account
+    #[error("Unknown Account")]
+    UnknownAccount,
 }
 
 impl From<EscrowError> for ProgramError {
