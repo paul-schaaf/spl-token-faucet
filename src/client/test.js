@@ -5,17 +5,25 @@ import {
   LAMPORTS_PER_SOL,
   Transaction,
   SystemProgram,
-  TransactionInstruction
+  TransactionInstruction,
 } from "@solana/web3.js";
-import * as BufferLayout from "buffer-layout";
+import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import * as BufferLayout from "buffer-layout"; 
 
 import { url } from "./url";
 import { Store } from "./util/store";
 import { newAccountWithLamports } from "./util/new-account-with-lamports";
 import { sendAndConfirmTransaction } from "./util/send-and-confirm-transaction";
+import * as Layout from "./util/layout";
+
+const util = require('util');
 
 const escrowAccountDataLayout = BufferLayout.struct([
-  BufferLayout.seq(BufferLayout.u8(), 105, "escrow"),
+  BufferLayout.u8('isInitialized'),
+  Layout.publicKey('initializerPubkey'),
+  Layout.publicKey('sendingTokenAccountPubkey'),
+  Layout.publicKey('receivingTokenAccountPubkey'),
+  Layout.uint64('expectedAmount'),
 ]);
 
 const test = async () => {
@@ -39,18 +47,67 @@ const test = async () => {
     LAMPORTS_PER_SOL * 10
   );
 
-  console.log(await connection.getBalance(payerAccount.publicKey, 'singleGossip') / LAMPORTS_PER_SOL);
+  const mintSending = await Token.createMint(
+    connection,
+    payerAccount,
+    payerAccount.publicKey,
+    payerAccount.publicKey,
+    0,
+    TOKEN_PROGRAM_ID
+  );
 
-  const escrowAccount = await initEscrow(payerAccount, connection, programId);
+  const taccSending = await mintSending.createAccount(payerAccount.publicKey);
+
+  const mintReceiving = await Token.createMint(
+    connection,
+    payerAccount,
+    payerAccount.publicKey,
+    payerAccount.publicKey,
+    0,
+    TOKEN_PROGRAM_ID
+  );
+
+  const taccReceiving = await mintReceiving.createAccount(
+    payerAccount.publicKey
+  );
+
+  const escrowAccount = await initEscrow(
+    payerAccount,
+    connection,
+    programId,
+    taccSending,
+    taccReceiving
+  );
 
   console.log("Saving escrow state to store...");
   await store.save("escrow.json", {
     escrowAccountPubkey: escrowAccount.publicKey.toBase58(),
+    initializerPubkey: payerAccount.publicKey.toBase58(),
+    taccSending: taccSending.toBase58(),
+    taccReceiving: taccSending.toBase58(),
     creatorSecret: payerAccount.secretKey,
   });
+
+  const accountDataBuffer = Buffer.from(JSON.parse(JSON.stringify(await connection.getParsedAccountInfo(escrowAccount.publicKey, 'singleGossip'))).value.data.data);
+
+  const decodedData = escrowAccountDataLayout.decode(accountDataBuffer);
+
+  decodedData.initializerPubkey = (new PublicKey(decodedData.initializerPubkey)).toBase58();
+  decodedData.sendingTokenAccountPubkey = (new PublicKey(decodedData.sendingTokenAccountPubkey)).toBase58();
+  decodedData.receivingTokenAccountPubkey = (new PublicKey(decodedData.receivingTokenAccountPubkey)).toBase58();
+  decodedData.expectedAmount = parseInt(decodedData.expectedAmount.toString("hex"), 16)
+
+  console.log("Escrow account data: ");
+  console.log(decodedData);
 };
 
-const initEscrow = async (payerAccount, connection, programId) => {
+const initEscrow = async (
+  payerAccount,
+  connection,
+  programId,
+  taccSending,
+  taccReceiving
+) => {
   const escrowAccount = new Account();
   let escrowAccountPubkey = escrowAccount.publicKey;
   const space = escrowAccountDataLayout.span;
@@ -60,22 +117,25 @@ const initEscrow = async (payerAccount, connection, programId) => {
   const initEscrowInstruction = new TransactionInstruction({
     keys: [
       { pubkey: payerAccount.publicKey, isSigner: true, isWritable: false },
-      { pubkey: new PublicKey("7G4eQSF3hM6jPv9bzLh2byx7dgqMDNiFqJY9pT6Kqdqm"), isSigner: false, isWritable: true},
-      { pubkey: new PublicKey("6LrR7bzTCk8LHaUuCKBmc3TB4wAKeQqvpSqF6EvThM9p"), isSigner: false, isWritable: true },
-      { pubkey: escrowAccountPubkey, isSigner: false, isWritable: true}
+      { pubkey: taccSending, isSigner: false, isWritable: true },
+      { pubkey: taccReceiving, isSigner: false, isWritable: true },
+      { pubkey: escrowAccountPubkey, isSigner: true, isWritable: true },
     ],
-    programId
+    programId,
+    data: Uint8Array.of(0, 0, 0, 0, 0, 0, 0, 0, 76),
   });
 
-  const transaction = new Transaction().add(
-    SystemProgram.createAccount({
-      fromPubkey: payerAccount.publicKey,
-      newAccountPubkey: escrowAccountPubkey,
-      lamports,
-      space,
-      programId,
-    })
-  ).add(initEscrowInstruction);
+  const transaction = new Transaction()
+    .add(
+      SystemProgram.createAccount({
+        fromPubkey: payerAccount.publicKey,
+        newAccountPubkey: escrowAccountPubkey,
+        lamports,
+        space,
+        programId,
+      })
+    )
+    .add(initEscrowInstruction);
   console.log("Initializing escrow account...");
   await sendAndConfirmTransaction(
     connection,

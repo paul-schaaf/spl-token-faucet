@@ -43,6 +43,7 @@
     "prettier": "^2.1.2"
   },
   "dependencies": {
+    "@solana/spl-token": "0.0.13",
     "@solana/web3.js": "^0.86.2",
     "buffer-layout": "^1.2.0",
     "dotenv": "^8.2.0",
