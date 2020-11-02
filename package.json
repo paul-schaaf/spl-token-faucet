@@ -15,6 +15,7 @@
     "build:client": "babel src/client -d dist/client",
     "clean:client": "rm -rf dist/client && rm -rf store",
     "deploy": "npm run build:client && node dist/client/deploy.js",
+    "test": "npm run build:client && node dist/client/test.js",
     "clean": "npm run clean:program && npm run clean:client && rm -rf dist",
     "build:program": "cd src/program && cargo build-bpf && cd $INIT_CWD && rm -rf dist && mkdir dist && mkdir dist/program && mv src/program/solana_escrow.so dist/program/solana_escrow.so",
     "clippy": "cd src/program && cargo clippy",
