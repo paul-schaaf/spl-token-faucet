@@ -1,5 +1,4 @@
-use std::str::FromStr;
-
+use crate::{error::EscrowError, instruction::EscrowInstruction, state::Escrow};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
@@ -8,15 +7,12 @@ use solana_program::{
     program_pack::{IsInitialized, Pack},
     pubkey::Pubkey,
 };
-
 use spl_token::{error::TokenError, state::Account as TokenAccount};
-
-use crate::{error::EscrowError, instruction::EscrowInstruction, state::Escrow};
-
-pub struct Processor;
+use std::str::FromStr;
 
 const TOKEN_PROGRAM_ID: &str = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 
+pub struct Processor;
 impl Processor {
     pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
         let instruction = EscrowInstruction::unpack(input)?;

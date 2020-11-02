@@ -409,15 +409,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8cab7a364d15cde1e505267766a2d3c4e22a843e1a601f0fa7564c0f82ced11c"
 
 [[package]]
-name = "remove_dir_all"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfc5b3ce5d5ea144bb04ebd093a9e14e9765bcfec866aecda9b6dec43b3d1e24"
-dependencies = [
- "winapi",
-]
-
-[[package]]
 name = "rustc_version"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -590,13 +581,12 @@ dependencies = [
 [[package]]
 name = "spl-token"
 version = "2.0.8"
-source = "git+https://github.com/solana-labs/solana-program-library#6fde6e0cdadabd0999758becd0e2e48e31b528d4"
+source = "git+https://github.com/solana-labs/solana-program-library#0ca46c6220c281177f99a93a55185554a4a63a16"
 dependencies = [
  "arrayref",
  "num-derive",
  "num-traits",
  "num_enum",
- "remove_dir_all",
  "solana-program",
  "thiserror",
 ]
