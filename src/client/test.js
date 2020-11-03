@@ -8,7 +8,7 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import * as BufferLayout from "buffer-layout"; 
+import * as BufferLayout from "buffer-layout";
 
 import { url } from "./url";
 import { Store } from "./util/store";
@@ -16,14 +16,12 @@ import { newAccountWithLamports } from "./util/new-account-with-lamports";
 import { sendAndConfirmTransaction } from "./util/send-and-confirm-transaction";
 import * as Layout from "./util/layout";
 
-const util = require('util');
-
 const escrowAccountDataLayout = BufferLayout.struct([
-  BufferLayout.u8('isInitialized'),
-  Layout.publicKey('initializerPubkey'),
-  Layout.publicKey('sendingTokenAccountPubkey'),
-  Layout.publicKey('receivingTokenAccountPubkey'),
-  Layout.uint64('expectedAmount'),
+  BufferLayout.u8("isInitialized"),
+  Layout.publicKey("initializerPubkey"),
+  Layout.publicKey("sendingTokenAccountPubkey"),
+  Layout.publicKey("receivingTokenAccountPubkey"),
+  Layout.uint64("expectedAmount"),
 ]);
 
 const test = async () => {
@@ -42,11 +40,13 @@ const test = async () => {
 
   const programId = new PublicKey(deployConfig.programId);
 
+  console.log("Creating payer account...");
   let payerAccount = await newAccountWithLamports(
     connection,
     LAMPORTS_PER_SOL * 10
   );
 
+  console.log("Creating sending token mint account...");
   const mintSending = await Token.createMint(
     connection,
     payerAccount,
@@ -56,8 +56,10 @@ const test = async () => {
     TOKEN_PROGRAM_ID
   );
 
+  console.log("Creating sending token account...");
   const taccSending = await mintSending.createAccount(payerAccount.publicKey);
 
+  console.log("Creating receiving token mint account...");
   const mintReceiving = await Token.createMint(
     connection,
     payerAccount,
@@ -67,6 +69,7 @@ const test = async () => {
     TOKEN_PROGRAM_ID
   );
 
+  console.log("Creating receiving token account...");
   const taccReceiving = await mintReceiving.createAccount(
     payerAccount.publicKey
   );
@@ -88,15 +91,9 @@ const test = async () => {
     creatorSecret: payerAccount.secretKey,
   });
 
-  const accountDataBuffer = Buffer.from(JSON.parse(JSON.stringify(await connection.getParsedAccountInfo(escrowAccount.publicKey, 'singleGossip'))).value.data.data);
+  const decodedData = await getEscrowAccountData(connection, escrowAccount);
 
-  const decodedData = escrowAccountDataLayout.decode(accountDataBuffer);
-
-  decodedData.initializerPubkey = (new PublicKey(decodedData.initializerPubkey)).toBase58();
-  decodedData.sendingTokenAccountPubkey = (new PublicKey(decodedData.sendingTokenAccountPubkey)).toBase58();
-  decodedData.receivingTokenAccountPubkey = (new PublicKey(decodedData.receivingTokenAccountPubkey)).toBase58();
-  decodedData.expectedAmount = parseInt(decodedData.expectedAmount.toString("hex"), 16)
-
+  console.log("Escrow account address: " + escrowAccount.publicKey.toBase58());
   console.log("Escrow account data: ");
   console.log(decodedData);
 };
@@ -143,9 +140,39 @@ const initEscrow = async (
     payerAccount,
     escrowAccount
   );
-  console.log("Escrow account initialized!");
 
   return escrowAccount;
+};
+
+const getEscrowAccountData = async (connection, escrowAccount) => {
+  const accountDataBuffer = Buffer.from(
+    JSON.parse(
+      JSON.stringify(
+        await connection.getParsedAccountInfo(
+          escrowAccount.publicKey,
+          "singleGossip"
+        )
+      )
+    ).value.data.data
+  );
+
+  const decodedData = escrowAccountDataLayout.decode(accountDataBuffer);
+
+  decodedData.initializerPubkey = new PublicKey(
+    decodedData.initializerPubkey
+  ).toBase58();
+  decodedData.sendingTokenAccountPubkey = new PublicKey(
+    decodedData.sendingTokenAccountPubkey
+  ).toBase58();
+  decodedData.receivingTokenAccountPubkey = new PublicKey(
+    decodedData.receivingTokenAccountPubkey
+  ).toBase58();
+  decodedData.expectedAmount = parseInt(
+    decodedData.expectedAmount.toString("hex"),
+    16
+  );
+
+  return decodedData;
 };
 
 test()
