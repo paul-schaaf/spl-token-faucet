@@ -3,7 +3,7 @@ use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     info,
-    program::invoke,
+    program::{invoke, invoke_signed},
     program_error::ProgramError,
     program_pack::{IsInitialized, Pack},
     pubkey::Pubkey,
@@ -159,8 +159,6 @@ impl Processor {
 
         let escrow_info = Escrow::unpack(&escrow_account.data.borrow())?;
         if escrow_info.expected_amount != takers_temp_token_account_info.amount {
-            info!(&format!("{}", escrow_info.expected_amount));
-            info!(&format!("{}", takers_temp_token_account_info.amount));
             return Err(EscrowError::ExpectedFundsMismatch.into());
         }
 
@@ -186,7 +184,6 @@ impl Processor {
             &[&taker.key],
             takers_temp_token_account_info.amount,
         )?;
-
         info!("Calling the token program to transfer tokens to the creator");
         invoke(
             &transfer_to_creator_ix,
@@ -215,6 +212,29 @@ impl Processor {
                 token_program.clone(),
             ],
         )?;
+
+        let pda_account = next_account_info(account_info_iter)?;
+
+        let transfer_to_taker_ix = spl_token::instruction::transfer(
+            token_program.key,
+            pdas_temp_token_account.key,
+            takers_received_token_account.key,
+            &pda,
+            &[&pda],
+            pdas_temp_token_account_info.amount,
+        )?;
+        info!("Calling the token program to transfer tokens to the taker");
+        invoke_signed(
+            &transfer_to_taker_ix,
+            &[
+                pdas_temp_token_account.clone(),
+                takers_received_token_account.clone(),
+                pda_account.clone(),
+                token_program.clone(),
+            ],
+            &[&[&b"escrow"[..], &[nonce]]],
+        )?;
+
         Ok(())
     }
 }

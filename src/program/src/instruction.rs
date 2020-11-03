@@ -34,6 +34,7 @@ pub enum EscrowInstruction {
     /// 5. `[writable]` The creator's token account that will receive tokens
     /// 6. `[writable]` The escrow account holding the escrow info
     /// 7. `[]` The token program TODO: should this get passed as an input or as an account?
+    /// 8. `[]` The PDA account
     Exchange {
         /// the amount the taker expects to be paid in the other token, as a u64 because that's the max possible supply of a token
         amount: u64,

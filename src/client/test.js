@@ -25,6 +25,7 @@ const ESCROW_ACCOUNT_DATA_LAYOUT = BufferLayout.struct([
 ]);
 
 const CREATOR_EXPECTED_AMOUNT = 76;
+const TAKER_EXPECTED_AMOUNT = 100;
 
 const test = async () => {
   const store = new Store();
@@ -68,7 +69,7 @@ const test = async () => {
   const taccSending = await mintSending.createAccount(creatorAccount.publicKey);
 
   console.log("Minting tokens to taccSending account...");
-  await mintSending.mintTo(taccSending, masterAccount, [], 100);
+  await mintSending.mintTo(taccSending, masterAccount, [], TAKER_EXPECTED_AMOUNT);
 
   console.log("Creating receiving token mint account...");
   const mintReceiving = await Token.createMint(
@@ -165,7 +166,7 @@ const test = async () => {
       .amount !==
     "" + CREATOR_EXPECTED_AMOUNT
   ) {
-    console.log("Creator did not get his tokens");
+    throw new Error("Creator did not get his tokens");
   }
 
   const temporaryTakerSendingAccountData = await connection.getParsedAccountInfo(
@@ -173,8 +174,22 @@ const test = async () => {
     "singleGossip"
   );
   if (temporaryTakerSendingAccountData.value !== null) {
-    console.log("Taker's temporary sending account has not been closed");
+    throw new Error("Taker's temporary sending account has not been closed");
   }
+
+  const takerReceivedTokenAccountData = await connection.getParsedAccountInfo(
+    takerTaccReceiving,
+    "singleGossip"
+  );
+  if (
+    takerReceivedTokenAccountData.value.data.parsed.info.tokenAmount
+      .amount !==
+    "" + TAKER_EXPECTED_AMOUNT
+  ) {
+    throw new Error("Taker did not get his tokens");
+  }
+
+  console.log("TRADE COMPLETE");
 };
 
 const initEscrow = async (
@@ -245,9 +260,12 @@ const exchange = async (
       { pubkey: taccReceiving, isSigner: false, isWritable: true },
       { pubkey: escrow, isSigner: false, isWritable: true },
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: (
+        await PublicKey.findProgramAddress([Buffer.from("escrow")], programId)
+      )[0], isSigner: false, isWritable: false}
     ],
     programId,
-    data: Uint8Array.of(1, 100, 0, 0, 0, 0, 0, 0, 0),
+    data: Uint8Array.of(1, TAKER_EXPECTED_AMOUNT, 0, 0, 0, 0, 0, 0, 0),
   });
 
   console.log("Taking the trade...");
