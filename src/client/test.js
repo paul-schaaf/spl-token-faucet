@@ -189,6 +189,14 @@ const test = async () => {
     throw new Error("Taker did not get his tokens");
   }
 
+  const temporaryPDASendingAccountData = await connection.getParsedAccountInfo(
+    taccSending,
+    "singleGossip"
+  );
+  if (temporaryPDASendingAccountData.value !== null) {
+    throw new Error("PDA's temporary sending account has not been closed");
+  }
+
   console.log("TRADE COMPLETE");
 };
 

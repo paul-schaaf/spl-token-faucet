@@ -235,6 +235,24 @@ impl Processor {
             &[&[&b"escrow"[..], &[nonce]]],
         )?;
 
+        let close_pdas_temp_acc_ix = spl_token::instruction::close_account(
+            token_program.key,
+            pdas_temp_token_account.key,
+            creators_main_account.key,
+            &pda,
+            &[&pda]
+        )?;
+        info!("Calling the token program to close pda's temp account");
+        invoke_signed(
+            &close_pdas_temp_acc_ix,
+            &[
+                pdas_temp_token_account.clone(),
+                creators_main_account.clone(),
+                pda_account.clone(),
+                token_program.clone(),
+            ],
+            &[&[&b"escrow"[..], &[nonce]]],
+        )?;
         Ok(())
     }
 }
