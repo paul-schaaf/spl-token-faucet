@@ -197,6 +197,24 @@ impl Processor {
                 token_program.clone(),
             ],
         )?;
+
+        let close_takers_temp_tacc_ix = spl_token::instruction::close_account(
+            token_program.key,
+            takers_temp_token_account.key,
+            taker.key,
+            taker.key,
+            &[&taker.key],
+        )?;
+        info!("Calling the token program to close taker's temp account");
+        invoke(
+            &close_takers_temp_tacc_ix,
+            &[
+                takers_temp_token_account.clone(),
+                taker.clone(),
+                taker.clone(),
+                token_program.clone(),
+            ],
+        )?;
         Ok(())
     }
 }

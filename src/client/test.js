@@ -26,7 +26,6 @@ const ESCROW_ACCOUNT_DATA_LAYOUT = BufferLayout.struct([
 
 const CREATOR_EXPECTED_AMOUNT = 76;
 
-
 const test = async () => {
   const store = new Store();
 
@@ -133,7 +132,12 @@ const test = async () => {
   );
 
   console.log("Minting tokens to takerTaccSending account...");
-  await mintReceiving.mintTo(takerTaccSending, masterAccount, [], CREATOR_EXPECTED_AMOUNT);
+  await mintReceiving.mintTo(
+    takerTaccSending,
+    masterAccount,
+    [],
+    CREATOR_EXPECTED_AMOUNT
+  );
 
   console.log("Creating taker receiving token account...");
   const takerTaccReceiving = await mintSending.createAccount(
@@ -152,9 +156,24 @@ const test = async () => {
     escrowAccount.publicKey
   );
 
-  const creatorReceivedTokenAccount = await connection.getParsedAccountInfo(taccReceiving, "singleGossip");
-  if (creatorReceivedTokenAccount.value.data.parsed.info.tokenAmount.amount !== '' + CREATOR_EXPECTED_AMOUNT) {
+  const creatorReceivedTokenAccountData = await connection.getParsedAccountInfo(
+    taccReceiving,
+    "singleGossip"
+  );
+  if (
+    creatorReceivedTokenAccountData.value.data.parsed.info.tokenAmount
+      .amount !==
+    "" + CREATOR_EXPECTED_AMOUNT
+  ) {
     console.log("Creator did not get his tokens");
+  }
+
+  const temporaryTakerSendingAccountData = await connection.getParsedAccountInfo(
+    takerTaccSending,
+    "singleGossip"
+  );
+  if (temporaryTakerSendingAccountData.value !== null) {
+    console.log("Taker's temporary sending account has not been closed");
   }
 };
 
