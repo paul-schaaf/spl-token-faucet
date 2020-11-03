@@ -94,7 +94,7 @@ impl Processor {
             &[&initializer.key],
         )?;
 
-        info!("Calling the token program to transfer token account ownership");
+        info!("Calling the token program to transfer token account ownership...");
         invoke(
             &owner_change_ix,
             &[
@@ -157,7 +157,11 @@ impl Processor {
             return Err(ProgramError::IncorrectProgramId);
         }
 
-        let escrow_info = Escrow::unpack(&escrow_account.data.borrow())?;
+        let mut escrow_info = Escrow::unpack(&escrow_account.data.borrow())?;
+        if !escrow_info.is_initialized {
+            return Err(ProgramError::UninitializedAccount);
+        }
+
         if escrow_info.expected_amount != takers_temp_token_account_info.amount {
             return Err(EscrowError::ExpectedFundsMismatch.into());
         }
@@ -184,7 +188,7 @@ impl Processor {
             &[&taker.key],
             takers_temp_token_account_info.amount,
         )?;
-        info!("Calling the token program to transfer tokens to the creator");
+        info!("Calling the token program to transfer tokens to the creator...");
         invoke(
             &transfer_to_creator_ix,
             &[
@@ -202,7 +206,7 @@ impl Processor {
             taker.key,
             &[&taker.key],
         )?;
-        info!("Calling the token program to close taker's temp account");
+        info!("Calling the token program to close taker's temp account...");
         invoke(
             &close_takers_temp_tacc_ix,
             &[
@@ -223,7 +227,7 @@ impl Processor {
             &[&pda],
             pdas_temp_token_account_info.amount,
         )?;
-        info!("Calling the token program to transfer tokens to the taker");
+        info!("Calling the token program to transfer tokens to the taker...");
         invoke_signed(
             &transfer_to_taker_ix,
             &[
@@ -242,7 +246,7 @@ impl Processor {
             &pda,
             &[&pda]
         )?;
-        info!("Calling the token program to close pda's temp account");
+        info!("Calling the token program to close pda's temp account...");
         invoke_signed(
             &close_pdas_temp_acc_ix,
             &[
@@ -253,6 +257,15 @@ impl Processor {
             ],
             &[&[&b"escrow"[..], &[nonce]]],
         )?;
+
+        info!("Closing the escrow account...");
+        **creators_main_account.lamports.borrow_mut() = creators_main_account.lamports()
+        .checked_add(escrow_account.lamports())
+        .ok_or(EscrowError::AmountOverflow)?;
+        **escrow_account.lamports.borrow_mut() = 0;
+        escrow_info.is_initialized = false;
+        Escrow::pack(escrow_info, &mut escrow_account.data.borrow_mut())?;
+
         Ok(())
     }
 }

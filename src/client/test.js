@@ -197,6 +197,14 @@ const test = async () => {
     throw new Error("PDA's temporary sending account has not been closed");
   }
 
+  const escrowAccountData = await connection.getParsedAccountInfo(
+    escrowAccount.publicKey,
+    "singleGossip"
+  );
+  if (escrowAccountData.value !== null) {
+    throw new Error("Escrow account has not been closed");
+  }
+
   console.log("TRADE COMPLETE");
 };
 

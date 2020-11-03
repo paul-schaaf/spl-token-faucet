@@ -24,6 +24,9 @@ pub enum EscrowError {
     /// Unknown account
     #[error("Unknown Account")]
     UnknownAccount,
+    /// Amount overflow
+    #[error("Amount Overflow")]
+    AmountOverflow
 }
 
 impl solana_program::program_error::PrintProgramError for EscrowError {
@@ -36,6 +39,7 @@ impl solana_program::program_error::PrintProgramError for EscrowError {
             Self::InvalidInstruction => info!("Error: Invalid Instruction"),
             Self::MissingInitializationData => info!("Error: Missing initialization data"),
             Self::UnknownAccount => info!("Error: Unknown account"),
+            Self::AmountOverflow => info!("Error: Amount overflow")
         }
     }
 }
