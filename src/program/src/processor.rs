@@ -3,11 +3,16 @@ use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     info,
+    program::invoke,
     program_error::ProgramError,
     program_pack::{IsInitialized, Pack},
     pubkey::Pubkey,
 };
-use spl_token::{error::TokenError, state::Account as TokenAccount};
+use spl_token::{
+    error::TokenError,
+    instruction::{set_authority as set_token_authority, AuthorityType as TokenAccountAuthority},
+    state::Account as TokenAccount,
+};
 use std::str::FromStr;
 
 const TOKEN_PROGRAM_ID: &str = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
@@ -76,6 +81,28 @@ impl Processor {
         escrow_info.expected_amount = amount;
 
         Escrow::pack(escrow_info, &mut escrow_account.data.borrow_mut())?;
+
+        let (pda, _nonce) = Pubkey::find_program_address(&[b"escrow"], program_id);
+
+        let token_program = next_account_info(account_info_iter)?;
+        let owner_change_ix = set_token_authority(
+            token_program.key,
+            temp_token_account.key,
+            Some(&pda),
+            TokenAccountAuthority::AccountOwner,
+            initializer.key,
+            &[&initializer.key],
+        )?;
+
+        info!("Calling the token program to transfer token account ownership");
+        invoke(
+            &owner_change_ix,
+            &[
+                temp_token_account.clone(),
+                initializer.clone(),
+                token_program.clone(),
+            ],
+        )?;
 
         Ok(())
     }

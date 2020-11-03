@@ -15,7 +15,8 @@ pub enum EscrowInstruction {
     /// 2. `[]` The initializer's token account for the token they will receive should the trade go through
     /// 3. `[writable]` The escrow account, it will hold all necessary info about the trade.
     /// This acc SHOULD be created atomically in the same tx as calling `InitEscrow`. Otherwise another party can acquire ownership of the uninitialized account.
-    /// 4. `[optional]` The account of the only person the initializer accepts for the deal, if left empty, anyone can take the other side of the escrow
+    /// 4. `[]` The token program TODO: should this get passed as an input or as an account?
+    /// 5. `[optional]` The account of the only person the initializer accepts for the deal, if left empty, anyone can take the other side of the escrow
     InitEscrow {
         /// the amount the initializer expects to be paid in the other token, as a u64 because that's the max possible supply of a token
         amount: u64,

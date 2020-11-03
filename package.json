@@ -27,7 +27,7 @@
     "cluster:testnet": "npm run clean:store && cp cluster-testnet.env .env",
     "cluster:mainnet-beta": "npm run clean:store && cp cluster-mainnet-beta.env .env",
     "localnet:update": "solana-localnet update",
-    "localnet:up": "set -x; solana-localnet down; set -e; solana-localnet up",
+    "localnet:up": "set -x; solana-localnet down; set -e; RUST_LOG=solana_runtime::system_instruction_processor=trace,solana_runtime::message_processor=info,solana_bpf_loader=debug,solana_rbpf=debug solana-localnet up",
     "localnet:down": "solana-localnet down",
     "localnet:logs": "solana-localnet logs -f"
   },

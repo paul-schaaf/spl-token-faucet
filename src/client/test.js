@@ -91,6 +91,16 @@ const test = async () => {
     taccReceiving
   );
 
+  const tempAccountData = await connection.getParsedAccountInfo(
+    taccSending,
+    "singleGossip"
+  );
+  const pda = (await PublicKey.findProgramAddress([Buffer.from("escrow")], programId))[0].toBase58();
+
+  if (pda !== tempAccountData.value.data.parsed.info.owner) {
+    throw new Error("Failed to transfer token account ownership to PDA");
+  }
+
   console.log("Saving escrow state to store...");
   await store.save("escrow.json", {
     escrowAccountPubkey: escrowAccount.publicKey.toBase58(),
@@ -124,7 +134,6 @@ const test = async () => {
   const takerTaccReceiving = await mintSending.createAccount(
     takerAccount.publicKey
   );
-
 };
 
 const initEscrow = async (
@@ -146,6 +155,7 @@ const initEscrow = async (
       { pubkey: taccSending, isSigner: false, isWritable: true },
       { pubkey: taccReceiving, isSigner: false, isWritable: true },
       { pubkey: escrowAccountPubkey, isSigner: true, isWritable: true },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false}
     ],
     programId,
     data: Uint8Array.of(0, 0, 0, 0, 0, 0, 0, 0, 76),
