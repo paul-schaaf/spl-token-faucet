@@ -32,7 +32,8 @@ pub enum EscrowInstruction {
     /// 3. `[writable]` The PDA's temp token account to get tokens from and eventually close
     /// 4. `[writable]` The creator's main account to send their rent fees to
     /// 5. `[writable]` The creator's token account that will receive tokens
-    /// 5. `[writable]` The escrow account holding the escrow info
+    /// 6. `[writable]` The escrow account holding the escrow info
+    /// 7. `[]` The token program TODO: should this get passed as an input or as an account?
     Exchange {
         /// the amount the taker expects to be paid in the other token, as a u64 because that's the max possible supply of a token
         amount: u64,

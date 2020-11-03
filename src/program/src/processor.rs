@@ -131,8 +131,6 @@ impl Processor {
         }
 
         let takers_received_token_account = next_account_info(account_info_iter)?;
-        let takers_received_token_account_info =
-            TokenAccount::unpack(&takers_received_token_account.data.borrow())?;
         if *takers_received_token_account.owner != Pubkey::from_str(TOKEN_PROGRAM_ID).unwrap() {
             return Err(ProgramError::IncorrectProgramId);
         }
@@ -150,21 +148,8 @@ impl Processor {
             return Err(EscrowError::ExpectedFundsMismatch.into());
         }
 
-        // TODO: probably unnecessary cause the token program will take care of this
-        if pdas_temp_token_account_info.mint != takers_received_token_account_info.mint {
-            return Err(TokenError::MintMismatch.into());
-        }
-
         let creators_main_account = next_account_info(account_info_iter)?;
         let creators_received_token_account = next_account_info(account_info_iter)?;
-        let creators_received_token_account_info =
-            TokenAccount::unpack(&creators_received_token_account.data.borrow())?;
-
-        // TODO: probably unnecessary cause the token program will take care of this
-        // If NOT, there will have to be additional checks for frozen accs too
-        if creators_received_token_account_info.mint != takers_temp_token_account_info.mint {
-            return Err(TokenError::MintMismatch.into());
-        }
 
         let escrow_account = next_account_info(account_info_iter)?;
 
@@ -174,6 +159,8 @@ impl Processor {
 
         let escrow_info = Escrow::unpack(&escrow_account.data.borrow())?;
         if escrow_info.expected_amount != takers_temp_token_account_info.amount {
+            info!(&format!("{}", escrow_info.expected_amount));
+            info!(&format!("{}", takers_temp_token_account_info.amount));
             return Err(EscrowError::ExpectedFundsMismatch.into());
         }
 
@@ -189,6 +176,27 @@ impl Processor {
             return Err(EscrowError::UnknownAccount.into());
         }
 
+        let token_program = next_account_info(account_info_iter)?;
+
+        let transfer_to_creator_ix = spl_token::instruction::transfer(
+            token_program.key,
+            takers_temp_token_account.key,
+            creators_received_token_account.key,
+            taker.key,
+            &[&taker.key],
+            takers_temp_token_account_info.amount,
+        )?;
+
+        info!("Calling the token program to transfer tokens to the creator");
+        invoke(
+            &transfer_to_creator_ix,
+            &[
+                takers_temp_token_account.clone(),
+                creators_received_token_account.clone(),
+                taker.clone(),
+                token_program.clone(),
+            ],
+        )?;
         Ok(())
     }
 }

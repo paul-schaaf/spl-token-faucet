@@ -16,13 +16,16 @@ import { newAccountWithLamports } from "./util/new-account-with-lamports";
 import { sendAndConfirmTransaction } from "./util/send-and-confirm-transaction";
 import * as Layout from "./util/layout";
 
-const escrowAccountDataLayout = BufferLayout.struct([
+const ESCROW_ACCOUNT_DATA_LAYOUT = BufferLayout.struct([
   BufferLayout.u8("isInitialized"),
   Layout.publicKey("initializerPubkey"),
   Layout.publicKey("sendingTokenAccountPubkey"),
   Layout.publicKey("receivingTokenAccountPubkey"),
   Layout.uint64("expectedAmount"),
 ]);
+
+const CREATOR_EXPECTED_AMOUNT = 76;
+
 
 const test = async () => {
   const store = new Store();
@@ -65,7 +68,7 @@ const test = async () => {
   console.log("Creating sending token account...");
   const taccSending = await mintSending.createAccount(creatorAccount.publicKey);
 
-  console.log("Minting tokens to taccSending account");
+  console.log("Minting tokens to taccSending account...");
   await mintSending.mintTo(taccSending, masterAccount, [], 100);
 
   console.log("Creating receiving token mint account...");
@@ -95,7 +98,9 @@ const test = async () => {
     taccSending,
     "singleGossip"
   );
-  const pda = (await PublicKey.findProgramAddress([Buffer.from("escrow")], programId))[0].toBase58();
+  const pda = (
+    await PublicKey.findProgramAddress([Buffer.from("escrow")], programId)
+  )[0].toBase58();
 
   if (pda !== tempAccountData.value.data.parsed.info.owner) {
     throw new Error("Failed to transfer token account ownership to PDA");
@@ -127,13 +132,30 @@ const test = async () => {
     takerAccount.publicKey
   );
 
-  console.log("Minting tokens to takerTaccSending account");
-  await mintReceiving.mintTo(takerTaccSending, masterAccount, [], 76);
+  console.log("Minting tokens to takerTaccSending account...");
+  await mintReceiving.mintTo(takerTaccSending, masterAccount, [], CREATOR_EXPECTED_AMOUNT);
 
   console.log("Creating taker receiving token account...");
   const takerTaccReceiving = await mintSending.createAccount(
     takerAccount.publicKey
   );
+
+  await exchange(
+    takerAccount,
+    connection,
+    programId,
+    takerTaccSending,
+    takerTaccReceiving,
+    taccSending,
+    taccReceiving,
+    creatorAccount.publicKey,
+    escrowAccount.publicKey
+  );
+
+  const creatorReceivedTokenAccount = await connection.getParsedAccountInfo(taccReceiving, "singleGossip");
+  if (creatorReceivedTokenAccount.value.data.parsed.info.tokenAmount.amount !== '' + CREATOR_EXPECTED_AMOUNT) {
+    console.log("Creator did not get his tokens");
+  }
 };
 
 const initEscrow = async (
@@ -145,9 +167,9 @@ const initEscrow = async (
 ) => {
   const escrowAccount = new Account();
   let escrowAccountPubkey = escrowAccount.publicKey;
-  const space = escrowAccountDataLayout.span;
+  const space = ESCROW_ACCOUNT_DATA_LAYOUT.span;
   const lamports = await connection.getMinimumBalanceForRentExemption(
-    escrowAccountDataLayout.span
+    ESCROW_ACCOUNT_DATA_LAYOUT.span
   );
   const initEscrowInstruction = new TransactionInstruction({
     keys: [
@@ -155,10 +177,10 @@ const initEscrow = async (
       { pubkey: taccSending, isSigner: false, isWritable: true },
       { pubkey: taccReceiving, isSigner: false, isWritable: true },
       { pubkey: escrowAccountPubkey, isSigner: true, isWritable: true },
-      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false}
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
     ],
     programId,
-    data: Uint8Array.of(0, 0, 0, 0, 0, 0, 0, 0, 76),
+    data: Uint8Array.of(0, CREATOR_EXPECTED_AMOUNT, 0, 0, 0, 0, 0, 0, 0),
   });
 
   const transaction = new Transaction()
@@ -183,6 +205,40 @@ const initEscrow = async (
   return escrowAccount;
 };
 
+const exchange = async (
+  takerMain,
+  connection,
+  programId,
+  takerTaccSending,
+  takerTaccReceiving,
+  taccSending,
+  taccReceiving,
+  creatorMain,
+  escrow
+) => {
+  const exchangeInstruction = new TransactionInstruction({
+    keys: [
+      { pubkey: takerMain.publicKey, isSigner: true, isWritable: false },
+      { pubkey: takerTaccSending, isSigner: false, isWritable: true },
+      { pubkey: takerTaccReceiving, isSigner: false, isWritable: true },
+      { pubkey: taccSending, isSigner: false, isWritable: true },
+      { pubkey: creatorMain, isSigner: false, isWritable: true },
+      { pubkey: taccReceiving, isSigner: false, isWritable: true },
+      { pubkey: escrow, isSigner: false, isWritable: true },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+    ],
+    programId,
+    data: Uint8Array.of(1, 100, 0, 0, 0, 0, 0, 0, 0),
+  });
+
+  console.log("Taking the trade...");
+  await sendAndConfirmTransaction(
+    connection,
+    new Transaction().add(exchangeInstruction),
+    takerMain
+  );
+};
+
 const getEscrowAccountData = async (connection, escrowAccount) => {
   const accountDataBuffer = Buffer.from(
     JSON.parse(
@@ -195,7 +251,7 @@ const getEscrowAccountData = async (connection, escrowAccount) => {
     ).value.data.data
   );
 
-  const decodedData = escrowAccountDataLayout.decode(accountDataBuffer);
+  const decodedData = ESCROW_ACCOUNT_DATA_LAYOUT.decode(accountDataBuffer);
 
   decodedData.initializerPubkey = new PublicKey(
     decodedData.initializerPubkey
@@ -207,7 +263,7 @@ const getEscrowAccountData = async (connection, escrowAccount) => {
     decodedData.receivingTokenAccountPubkey
   ).toBase58();
   decodedData.expectedAmount = parseInt(
-    decodedData.expectedAmount.toString("hex"),
+    decodedData.expectedAmount.toString("hex").match(/../g).reverse().join(""),
     16
   );
 
