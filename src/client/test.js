@@ -40,8 +40,14 @@ const test = async () => {
 
   const programId = new PublicKey(deployConfig.programId);
 
-  console.log("Creating payer account...");
-  let payerAccount = await newAccountWithLamports(
+  console.log("Creating master account...");
+  let masterAccount = await newAccountWithLamports(
+    connection,
+    LAMPORTS_PER_SOL * 10
+  );
+
+  console.log("Creating creator account...");
+  let creatorAccount = await newAccountWithLamports(
     connection,
     LAMPORTS_PER_SOL * 10
   );
@@ -49,33 +55,36 @@ const test = async () => {
   console.log("Creating sending token mint account...");
   const mintSending = await Token.createMint(
     connection,
-    payerAccount,
-    payerAccount.publicKey,
-    payerAccount.publicKey,
+    masterAccount,
+    masterAccount.publicKey,
+    masterAccount.publicKey,
     0,
     TOKEN_PROGRAM_ID
   );
 
   console.log("Creating sending token account...");
-  const taccSending = await mintSending.createAccount(payerAccount.publicKey);
+  const taccSending = await mintSending.createAccount(creatorAccount.publicKey);
+
+  console.log("Minting tokens to taccSending account");
+  await mintSending.mintTo(taccSending, masterAccount, [], 100);
 
   console.log("Creating receiving token mint account...");
   const mintReceiving = await Token.createMint(
     connection,
-    payerAccount,
-    payerAccount.publicKey,
-    payerAccount.publicKey,
+    masterAccount,
+    masterAccount.publicKey,
+    masterAccount.publicKey,
     0,
     TOKEN_PROGRAM_ID
   );
 
   console.log("Creating receiving token account...");
   const taccReceiving = await mintReceiving.createAccount(
-    payerAccount.publicKey
+    creatorAccount.publicKey
   );
 
   const escrowAccount = await initEscrow(
-    payerAccount,
+    creatorAccount,
     connection,
     programId,
     taccSending,
@@ -85,10 +94,10 @@ const test = async () => {
   console.log("Saving escrow state to store...");
   await store.save("escrow.json", {
     escrowAccountPubkey: escrowAccount.publicKey.toBase58(),
-    initializerPubkey: payerAccount.publicKey.toBase58(),
+    initializerPubkey: creatorAccount.publicKey.toBase58(),
     taccSending: taccSending.toBase58(),
     taccReceiving: taccSending.toBase58(),
-    creatorSecret: payerAccount.secretKey,
+    creatorSecret: creatorAccount.secretKey,
   });
 
   const decodedData = await getEscrowAccountData(connection, escrowAccount);
@@ -96,6 +105,26 @@ const test = async () => {
   console.log("Escrow account address: " + escrowAccount.publicKey.toBase58());
   console.log("Escrow account data: ");
   console.log(decodedData);
+
+  console.log("Creating taker account...");
+  let takerAccount = await newAccountWithLamports(
+    connection,
+    LAMPORTS_PER_SOL * 10
+  );
+
+  console.log("Creating taker sending token account...");
+  const takerTaccSending = await mintReceiving.createAccount(
+    takerAccount.publicKey
+  );
+
+  console.log("Minting tokens to takerTaccSending account");
+  await mintReceiving.mintTo(takerTaccSending, masterAccount, [], 76);
+
+  console.log("Creating taker receiving token account...");
+  const takerTaccReceiving = await mintSending.createAccount(
+    takerAccount.publicKey
+  );
+
 };
 
 const initEscrow = async (
