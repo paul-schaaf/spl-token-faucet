@@ -11,6 +11,9 @@ license = "MIT"
 homepage = "https://github.com/paul-schaaf/solana-escrow"
 edition = "2018"
 
+[features]
+no-entrypoint = []
+
 [dependencies]
 thiserror = "1.0.21"
 num-traits = "0.2"
