@@ -71,10 +71,11 @@ impl Processor {
             return Err(FaucetError::AccountNotRentExempt.into());
         }
 
-        let admin_pubkey = if next_account_info(account_info_iter).is_ok() {
-            COption::Some(*next_account_info(account_info_iter).unwrap().key)
-        } else {
-            COption::None
+        let admin_acc = next_account_info(account_info_iter);
+
+        let admin_pubkey = match admin_acc {
+            Ok(acc) => COption::Some(*acc.key),
+            Err(_) => COption::None,
         };
 
         faucet.is_initialized = true;
