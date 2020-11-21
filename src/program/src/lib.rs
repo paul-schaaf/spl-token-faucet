@@ -1,8 +1,5 @@
-use serum_pool::{declare_pool_entrypoint, Pool};
-
-enum SimplePool {}
-
-impl Pool for SimplePool {}
+pub mod error;
+pub mod processor;
 
 #[cfg(not(feature = "no-entrypoint"))]
-declare_pool_entrypoint!(SimplePool);
+pub mod entrypoint;

@@ -10,7 +10,7 @@ import { url } from "./url";
 import { Store } from "./util/store";
 import { newAccountWithLamports } from "./util/new-account-with-lamports";
 
-const pathToProgram = "dist/program/solana_escrow.so";
+const pathToProgram = "dist/program/spl_token_faucet.so";
 
 export const deploy = async () => {
   const store = new Store();

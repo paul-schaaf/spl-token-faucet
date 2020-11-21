@@ -1,10 +1,10 @@
 {
-  "name": "solana-escrow",
+  "name": "spl-token-faucet",
   "version": "0.0.1",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/paul-schaaf/solana-escrow"
+    "url": "https://github.com/paul-schaaf/spl-token-faucet"
   },
   "keywords": [],
   "author": "Paul",
@@ -17,7 +17,7 @@
     "deploy": "npm run build:client && node dist/client/deploy.js",
     "init-pool": "npm run build:client && node dist/client/initPool.js",
     "clean": "npm run clean:program && npm run clean:client && rm -rf dist",
-    "build:program": "cd src/program && cargo build-bpf && cd $INIT_CWD && rm -rf dist && mkdir dist && mkdir dist/program && mv src/program/solana_escrow.so dist/program/solana_escrow.so",
+    "build:program": "cd src/program && cargo build-bpf && cd $INIT_CWD && rm -rf dist && mkdir dist && mkdir dist/program && mv src/program/target/deploy/spl_token_faucet.so dist/program/spl_token_faucet.so",
     "clippy": "cd src/program && cargo clippy",
     "fmt": "cd src/program && cargo fmt",
     "clean:program": "cd src/program && cargo clean && cd $INIT_CWD && rm -rf dist/program",

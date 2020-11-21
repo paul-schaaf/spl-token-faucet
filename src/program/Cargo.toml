@@ -2,13 +2,13 @@
 # Note: This crate must be built using do.sh
 
 [package]
-name = "diy-etf"
+name = "spl-token-faucet"
 version = "0.0.1"
-description = "Solana escrow"
+description = "SPL Token Faucet"
 authors = ["Paul"]
-repository = "https://github.com/paul-schaaf/solana-escrow"
+repository = "https://github.com/paul-schaaf/spl-token-faucet"
 license = "MIT"
-homepage = "https://github.com/paul-schaaf/solana-escrow"
+homepage = "https://github.com/paul-schaaf/spl-token-faucet"
 edition = "2018"
 
 [features]
@@ -21,8 +21,7 @@ num-derive = "0.3"
 arrayref = "0.3.6"
 solana-program="1.4.4"
 spl-token = {version = "3.0.0", default-features = false, features = ["no-entrypoint"]}
-serum-pool = {git = "https://github.com/paul-schaaf/custom-pool", default-features = false, branch = "main"}
 
 [lib]
-name = "solana_escrow"
+name = "spl_token_faucet"
 crate-type = ["cdylib", "lib"]
