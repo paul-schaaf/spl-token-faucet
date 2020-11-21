@@ -15,9 +15,9 @@ pub enum FaucetError {
     /// Invalid instruction
     #[error("Invalid Instruction")]
     InvalidInstruction,
-    /// Missing initialization data
-    #[error("Missing Initialization Data")]
-    MissingInitializationData,
+    /// Incorrect initialization data
+    #[error("Incorrect Initialization Data")]
+    IncorrectInitializationData,
 }
 
 impl solana_program::program_error::PrintProgramError for FaucetError {
@@ -27,7 +27,7 @@ impl solana_program::program_error::PrintProgramError for FaucetError {
     {
         match self {
             Self::InvalidInstruction => info!("Error: Invalid Instruction"),
-            Self::MissingInitializationData => info!("Error: Missing initialization data"),
+            Self::IncorrectInitializationData => info!("Error: Incorrect initialization data"),
         }
     }
 }
