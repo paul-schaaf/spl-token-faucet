@@ -18,6 +18,12 @@ pub enum FaucetError {
     /// Incorrect initialization data
     #[error("Incorrect Initialization Data")]
     IncorrectInitializationData,
+    /// Not Rent Excempt
+    #[error("Account Not Rent Exempt")]
+    AccountNotRentExempt,
+    /// Account Already In Use
+    #[error("Account Already In Use")]
+    AccountAlreadyInUse,
 }
 
 impl solana_program::program_error::PrintProgramError for FaucetError {
@@ -28,6 +34,8 @@ impl solana_program::program_error::PrintProgramError for FaucetError {
         match self {
             Self::InvalidInstruction => info!("Error: Invalid Instruction"),
             Self::IncorrectInitializationData => info!("Error: Incorrect initialization data"),
+            Self::AccountNotRentExempt => info!("Error: Account Not Rent Exempt"),
+            Self::AccountAlreadyInUse => info!("Error: Account Already In Use"),
         }
     }
 }
