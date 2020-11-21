@@ -3,8 +3,6 @@ use std::mem::size_of;
 
 use crate::error::FaucetError;
 use solana_program::program_error::ProgramError;
-use solana_program::program_option::COption;
-use solana_program::pubkey::Pubkey;
 
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq)]
@@ -16,9 +14,8 @@ pub enum FaucetInstruction {
     /// 2. `[writable]` Token Mint Account
     /// 3. `[writable]` Faucet Account
     /// 4. `[]` The SPL Token program
+    /// 5. `[optional]` Admin Account
     InitFaucet {
-        /// an admin may mint any amount of tokens per ix
-        admin: COption<Pubkey>,
         /// all other accounts may only mint this amount per ix
         amount: u64,
     },
@@ -44,13 +41,12 @@ impl FaucetInstruction {
         let (&tag, rest) = input.split_first().ok_or(FaucetError::InvalidInstruction)?;
         Ok(match tag {
             0 => {
-                let (admin, rest) = Self::unpack_pubkey_option(rest)?;
                 let amount = rest
                     .get(..8)
                     .and_then(|slice| slice.try_into().ok())
                     .map(u64::from_le_bytes)
                     .ok_or(FaucetError::InvalidInstruction)?;
-                Self::InitFaucet { admin, amount }
+                Self::InitFaucet { amount }
             }
             1 => {
                 let amount = rest
@@ -68,9 +64,8 @@ impl FaucetInstruction {
     pub fn pack(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(size_of::<Self>());
         match self {
-            Self::InitFaucet { ref admin, amount } => {
+            Self::InitFaucet { amount } => {
                 buf.push(0);
-                Self::pack_pubkey_option(admin, &mut buf);
                 buf.extend_from_slice(&amount.to_le_bytes());
             }
             Self::MintTokens { amount } => {
@@ -84,28 +79,6 @@ impl FaucetInstruction {
 
         buf
     }
-
-    fn unpack_pubkey_option(input: &[u8]) -> Result<(COption<Pubkey>, &[u8]), ProgramError> {
-        match input.split_first() {
-            Option::Some((&0, rest)) => Ok((COption::None, rest)),
-            Option::Some((&1, rest)) if rest.len() >= 32 => {
-                let (key, rest) = rest.split_at(32);
-                let pk = Pubkey::new(key);
-                Ok((COption::Some(pk), rest))
-            }
-            _ => Err(FaucetError::InvalidInstruction.into()),
-        }
-    }
-
-    fn pack_pubkey_option(value: &COption<Pubkey>, buf: &mut Vec<u8>) {
-        match *value {
-            COption::Some(ref key) => {
-                buf.push(1);
-                buf.extend_from_slice(&key.to_bytes());
-            }
-            COption::None => buf.push(0),
-        }
-    }
 }
 
 #[cfg(test)]
@@ -115,29 +88,8 @@ mod test {
     #[test]
     fn test_instruction_unpacking() {
         // 1 tag, 1 admin, 8 amount
-        let check = FaucetInstruction::unpack(&[0, 0, 7, 0, 0, 0, 0, 0, 0, 0]).unwrap();
-        assert_eq!(
-            FaucetInstruction::InitFaucet {
-                admin: COption::None,
-                amount: 7
-            },
-            check
-        );
-
-        // 1 tag, 33 admin, 8 amount
-        let check = FaucetInstruction::unpack(&[
-            0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 7, 3, 0, 0, 0, 0, 0, 0,
-        ])
-        .unwrap();
-        assert_eq!(
-            FaucetInstruction::InitFaucet {
-                admin: COption::Some(Pubkey::new(&[1u8; 32])),
-                amount: 775
-            },
-            check
-        );
-
+        let check = FaucetInstruction::unpack(&[0, 7, 3, 0, 0, 0, 0, 0, 0]).unwrap();
+        assert_eq!(FaucetInstruction::InitFaucet { amount: 775 }, check);
         // 1 tag,  8 amount
         let check = FaucetInstruction::unpack(&[1, 7, 3, 0, 0, 0, 0, 0, 0]).unwrap();
         assert_eq!(FaucetInstruction::MintTokens { amount: 775 }, check);
@@ -149,24 +101,10 @@ mod test {
 
     #[test]
     fn test_instruction_packing() {
-        let check = FaucetInstruction::InitFaucet {
-            admin: COption::None,
-            amount: 900,
-        };
+        let check = FaucetInstruction::InitFaucet { amount: 900 };
 
         let packed = check.pack();
-        let mut expect = vec![0, 0];
-        expect.extend_from_slice(&u64::to_le_bytes(900));
-        assert_eq!(packed, expect);
-
-        let check = FaucetInstruction::InitFaucet {
-            admin: COption::Some(Pubkey::new(&[1u8; 32])),
-            amount: 900,
-        };
-
-        let packed = check.pack();
-        let mut expect = vec![0, 1];
-        expect.extend_from_slice(&[1u8; 32]);
+        let mut expect = vec![0];
         expect.extend_from_slice(&u64::to_le_bytes(900));
         assert_eq!(packed, expect);
 
