@@ -7,14 +7,12 @@ use solana_program::program_error::ProgramError;
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq)]
 pub enum FaucetInstruction {
-    /// Initializes a faucet and transfers mint authority to the PDA
+    /// Initializes a faucet
     ///
-    /// 0. `[signer]` Current mint authority
-    /// 1. `[]` New mint authority - Program Derived Address
-    /// 2. `[writable]` Token Mint Account
-    /// 3. `[writable]` Faucet Account
-    /// 4. `[]` The SPL Token program
-    /// 5. `[optional]` Admin Account
+    /// 0. `[]` Token Mint Account
+    /// 1. `[writable]` Faucet Account
+    /// 2. `[]` Rent Sysvar
+    /// 3. `[optional]` Admin Account
     InitFaucet {
         /// all other accounts may only mint this amount per ix
         amount: u64,
