@@ -27,6 +27,7 @@ impl Processor {
             }
             FaucetInstruction::MintTokens { amount } => {
                 info!("Instruction: MintTokens");
+                Self::process_mint_tokens(accounts, amount, program_id)?
             }
             FaucetInstruction::CloseFaucet => {
                 info!("Instruction: CloseFaucet");
@@ -84,6 +85,64 @@ impl Processor {
 
         Faucet::pack(faucet, &mut faucet_account.data.borrow_mut())?;
 
+        Ok(())
+    }
+
+    pub fn process_mint_tokens(
+        accounts: &[AccountInfo],
+        amount: u64,
+        program_id: &Pubkey,
+    ) -> ProgramResult {
+        let account_info_iter = &mut accounts.iter();
+
+        let pda_account = next_account_info(account_info_iter)?;
+        let (pda, nonce) = Pubkey::find_program_address(&[b"faucet"], program_id);
+
+        if pda != *pda_account.key {
+            return Err(ProgramError::InvalidAccountData);
+        }
+
+        let mint_acc = next_account_info(account_info_iter)?;
+        let token_dest_acc = next_account_info(account_info_iter)?;
+        let token_program = next_account_info(account_info_iter)?;
+
+        let faucet_acc = next_account_info(account_info_iter)?;
+
+        let faucet = Faucet::unpack_from_slice(&faucet_acc.data.borrow())?;
+
+        let admin_acc = next_account_info(account_info_iter);
+
+        if faucet.admin.is_none()
+            || match admin_acc {
+                Ok(acc) => !acc.is_signer || faucet.admin.unwrap() != *acc.key,
+                Err(_) => true,
+            }
+        {
+            if amount > faucet.amount {
+                return Err(FaucetError::RequestingTooManyTokens.into());
+            }
+        }
+
+        let ix = spl_token::instruction::mint_to(
+            token_program.key,
+            mint_acc.key,
+            token_dest_acc.key,
+            &pda,
+            &[],
+            amount,
+        )?;
+
+        info!("Calling the token program to mint tokens");
+        solana_program::program::invoke_signed(
+            &ix,
+            &[
+                mint_acc.clone(),
+                token_dest_acc.clone(),
+                pda_account.clone(),
+                token_program.clone(),
+            ],
+            &[&[&b"faucet"[..], &[nonce]]],
+        )?;
         Ok(())
     }
 }
