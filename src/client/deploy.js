@@ -1,14 +1,10 @@
-import {
-  Account,
-  Connection,
-  BpfLoader,
-  BPF_LOADER_PROGRAM_ID,
-} from "@solana/web3.js";
+import { Connection, BpfLoader, BPF_LOADER_PROGRAM_ID } from "@solana/web3.js";
 import fs from "mz/fs";
 
 import { url } from "./url";
 import { Store } from "./util/store";
 import { newAccountWithLamports } from "./util/new-account-with-lamports";
+import { createAccount } from "./util/account";
 
 const pathToProgram = "dist/program/spl_token_faucet.so";
 
@@ -55,7 +51,9 @@ export const deploy = async () => {
   // Load the program
   console.log("Loading program, this may take a minute...");
   const data = await fs.readFile(pathToProgram);
-  const programAccount = new Account();
+  const programAccount = await createAccount(
+    "prize auto empower pigeon quarter bright laptop basket hamster sniff coyote ketchup"
+  );
   await BpfLoader.load(
     connection,
     payerAccount,

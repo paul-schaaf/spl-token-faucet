@@ -45,10 +45,13 @@
   "dependencies": {
     "@solana/spl-token": "0.0.13",
     "@solana/web3.js": "^0.86.2",
+    "bip32": "^2.0.6",
+    "bip39": "^3.0.3",
     "buffer-layout": "^1.2.0",
     "dotenv": "^8.2.0",
     "mkdirp-promise": "^5.0.1",
-    "mz": "^2.7.0"
+    "mz": "^2.7.0",
+    "tweetnacl": "^1.0.3"
   },
   "engines": {
     "node": "11.x"
