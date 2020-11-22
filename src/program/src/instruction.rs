@@ -23,7 +23,8 @@ pub enum FaucetInstruction {
     /// 1. `[writable]` Token Mint Account
     /// 2. `[writable]` Destination Account
     /// 3. `[]` The SPL Token Program
-    /// 4. `[optional/signer]` Admin Account
+    /// 4. `[]` The Faucet Account
+    /// 5. `[optional/signer]` Admin Account
     MintTokens { amount: u64 },
     /// Closes the faucet, can only be done if the faucet has an admin key
     ///
