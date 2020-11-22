@@ -24,6 +24,9 @@ pub enum FaucetError {
     /// Account Already In Use
     #[error("Account Already In Use")]
     AccountAlreadyInUse,
+    /// Requesting Too Many Tokens
+    #[error("Requesting Too Many Tokens")]
+    RequestingTooManyTokens,
 }
 
 impl solana_program::program_error::PrintProgramError for FaucetError {
@@ -36,6 +39,7 @@ impl solana_program::program_error::PrintProgramError for FaucetError {
             Self::IncorrectInitializationData => info!("Error: Incorrect initialization data"),
             Self::AccountNotRentExempt => info!("Error: Account Not Rent Exempt"),
             Self::AccountAlreadyInUse => info!("Error: Account Already In Use"),
+            Self::RequestingTooManyTokens => info!("Error: Requesting Too Many Tokens"),
         }
     }
 }
