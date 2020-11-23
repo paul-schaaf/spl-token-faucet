@@ -62,9 +62,6 @@ impl Processor {
         if faucet.is_initialized {
             return Err(FaucetError::AccountAlreadyInUse.into());
         }
-        if faucet_account.owner != program_id {
-            return Err(ProgramError::IncorrectProgramId);
-        }
 
         let rent = &Rent::from_account_info(next_account_info(account_info_iter)?)?;
 
