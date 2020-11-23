@@ -12,6 +12,7 @@ use crate::error::FaucetError;
 pub struct Faucet {
     pub is_initialized: bool,
     pub admin: COption<Pubkey>,
+    pub mint: Pubkey,
     pub amount: u64,
 }
 
@@ -24,13 +25,13 @@ impl IsInitialized for Faucet {
 }
 
 impl Pack for Faucet {
-    const LEN: usize = 45;
+    const LEN: usize = 77;
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
         if src.len() < Faucet::LEN {
             return Err(FaucetError::IncorrectInitializationData.into());
         }
-        let src = array_ref![src, 0, 45];
-        let (is_initialized, admin, amount) = array_refs![src, 1, 36, 8];
+        let src = array_ref![src, 0, Faucet::LEN];
+        let (is_initialized, admin, amount, mint) = array_refs![src, 1, 36, 8, 32];
 
         let is_initialized = match is_initialized {
             [0] => false,
@@ -41,21 +42,25 @@ impl Pack for Faucet {
             is_initialized,
             admin: unpack_coption_key(admin)?,
             amount: u64::from_le_bytes(*amount),
+            mint: Pubkey::new_from_array(*mint),
         })
     }
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let dst = array_mut_ref![dst, 0, Faucet::LEN];
-        let (is_initialized_dst, admin_dst, amount_dst) = mut_array_refs!(dst, 1, 36, 8);
+        let (is_initialized_dst, admin_dst, amount_dst, mint_dst) =
+            mut_array_refs!(dst, 1, 36, 8, 32);
         let &Faucet {
             is_initialized,
             ref admin,
+            ref mint,
             amount,
         } = self;
 
         pack_coption_key(admin, admin_dst);
         is_initialized_dst[0] = is_initialized as u8;
         *amount_dst = amount.to_le_bytes();
+        *mint_dst = mint.to_bytes();
     }
 }
 

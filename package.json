@@ -15,6 +15,7 @@
     "build:client": "babel src/client -d dist/client",
     "clean:client": "rm -rf dist/client && rm -rf store",
     "deploy": "npm run build:client && node dist/client/deploy.js",
+    "deploy:clean": "npm run build:program && npm run clean:client && npm run deploy",
     "init-pool": "npm run build:client && node dist/client/initPool.js",
     "clean": "npm run clean:program && npm run clean:client && rm -rf dist",
     "build:program": "cd src/program && cargo build-bpf && cd $INIT_CWD && rm -rf dist && mkdir dist && mkdir dist/program && mv src/program/target/deploy/spl_token_faucet.so dist/program/spl_token_faucet.so",

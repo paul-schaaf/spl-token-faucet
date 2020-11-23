@@ -52,7 +52,7 @@ export const deploy = async () => {
   console.log("Loading program, this may take a minute...");
   const data = await fs.readFile(pathToProgram);
   const programAccount = await createAccount(
-    "prize auto empower pigeon quarter bright laptop basket hamster sniff coyote ketchup"
+    "sample cradle switch table parent planet weird wasp taxi camp rude angle"
   );
   await BpfLoader.load(
     connection,

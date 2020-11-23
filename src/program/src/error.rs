@@ -27,6 +27,18 @@ pub enum FaucetError {
     /// Requesting Too Many Tokens
     #[error("Requesting Too Many Tokens")]
     RequestingTooManyTokens,
+    /// Non Admin Closure Attempt
+    #[error("Non Admin Closure Attempt")]
+    NonAdminClosureAttempt,
+    /// Non Closable Faucet Closure Attempt
+    #[error("Non Closable Faucet Closure Attempt")]
+    NonClosableFaucetClosureAttempt,
+    /// Overflow
+    #[error("Overflow")]
+    Overflow,
+    /// Invalid Mint
+    #[error("Invalid Mint")]
+    InvalidMint,
 }
 
 impl solana_program::program_error::PrintProgramError for FaucetError {
@@ -40,6 +52,12 @@ impl solana_program::program_error::PrintProgramError for FaucetError {
             Self::AccountNotRentExempt => info!("Error: Account Not Rent Exempt"),
             Self::AccountAlreadyInUse => info!("Error: Account Already In Use"),
             Self::RequestingTooManyTokens => info!("Error: Requesting Too Many Tokens"),
+            Self::NonAdminClosureAttempt => info!("Error: Non Admin Closure Attempt"),
+            Self::NonClosableFaucetClosureAttempt => {
+                info!("Error: Non Closable Faucet Closure Attempt")
+            }
+            Self::Overflow => info!("Error: Overflow"),
+            Self::InvalidMint => info!("Error: Invalid Mint"),
         }
     }
 }
