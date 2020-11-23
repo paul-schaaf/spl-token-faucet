@@ -5,3 +5,4 @@ node_modules
 dist
 
 store
+id.json
