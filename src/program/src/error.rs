@@ -39,6 +39,9 @@ pub enum FaucetError {
     /// Invalid Mint
     #[error("Invalid Mint")]
     InvalidMint,
+    /// Incorrect Mint Authority
+    #[error("Incorrect Mint Authority")]
+    IncorrectMintAuthority,
 }
 
 impl solana_program::program_error::PrintProgramError for FaucetError {
@@ -58,6 +61,7 @@ impl solana_program::program_error::PrintProgramError for FaucetError {
             }
             Self::Overflow => info!("Error: Overflow"),
             Self::InvalidMint => info!("Error: Invalid Mint"),
+            Self::IncorrectMintAuthority => info!("Error: Incorrect Mint Authority"),
         }
     }
 }

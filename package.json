@@ -22,7 +22,7 @@
     "clippy": "cd src/program && cargo clippy",
     "fmt": "cd src/program && cargo fmt",
     "clean:program": "cd src/program && cargo clean && cd $INIT_CWD && rm -rf dist/program",
-    "test:program": "cd src/program && cargo test",
+    "test:program": "cd src/program && cargo test-bpf",
     "cluster:localnet": "npm run clean:store && rm -f .env",
     "cluster:devnet": "npm run clean:store && cp cluster-devnet.env .env",
     "cluster:testnet": "npm run clean:store && cp cluster-testnet.env .env",

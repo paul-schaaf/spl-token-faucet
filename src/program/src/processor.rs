@@ -54,7 +54,7 @@ impl Processor {
                 .mint_authority
                 .ok_or(ProgramError::InvalidAccountData)?
         {
-            return Err(ProgramError::InvalidAccountData);
+            return Err(FaucetError::IncorrectMintAuthority.into());
         }
 
         let faucet_account = next_account_info(account_info_iter)?;

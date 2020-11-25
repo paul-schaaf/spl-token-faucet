@@ -13,14 +13,20 @@ edition = "2018"
 
 [features]
 no-entrypoint = []
+test-bpf = []
 
 [dependencies]
 thiserror = "1.0.21"
 num-traits = "0.2"
 num-derive = "0.3"
 arrayref = "0.3.6"
-solana-program="1.4.4"
+solana-program="1.4.9"
 spl-token = {version = "3.0.0", default-features = false, features = ["no-entrypoint"]}
+
+[dev-dependencies]
+solana-program-test = "1.4.9"
+solana-sdk = "1.4.9"
+tokio = { version = "0.3", features = ["macros"]}
 
 [lib]
 name = "spl_token_faucet"
