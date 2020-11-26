@@ -1,9 +1,8 @@
 //! Program entrypoint
 
-use crate::{error::FaucetError, processor::Processor};
+use crate::processor::Processor;
 use solana_program::{
-    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, info,
-    program_error::PrintProgramError, pubkey::Pubkey,
+    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, info, pubkey::Pubkey,
 };
 
 // Declare and export the program's entrypoint
@@ -16,11 +15,5 @@ fn process_instruction(
     instruction_data: &[u8],
 ) -> ProgramResult {
     info!("Faucet entrypoint");
-
-    if let Err(error) = Processor::process(program_id, accounts, instruction_data) {
-        error.print::<FaucetError>();
-        return Err(error);
-    }
-
-    Ok(())
+    Processor::process(program_id, accounts, instruction_data)
 }

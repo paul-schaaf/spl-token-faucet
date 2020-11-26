@@ -1,14 +1,9 @@
 //! Error types
 
 use num_derive::FromPrimitive;
-use num_traits::FromPrimitive;
 use thiserror::Error;
 
-use solana_program::{
-    decode_error::DecodeError,
-    info,
-    program_error::{PrintProgramError, ProgramError},
-};
+use solana_program::{decode_error::DecodeError, program_error::ProgramError};
 
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
 pub enum FaucetError {
@@ -42,28 +37,6 @@ pub enum FaucetError {
     /// Incorrect Mint Authority
     #[error("Incorrect Mint Authority")]
     IncorrectMintAuthority,
-}
-
-impl solana_program::program_error::PrintProgramError for FaucetError {
-    fn print<E>(&self)
-    where
-        E: 'static + std::error::Error + DecodeError<E> + PrintProgramError + FromPrimitive,
-    {
-        match self {
-            Self::InvalidInstruction => info!("Error: Invalid Instruction"),
-            Self::IncorrectInitializationData => info!("Error: Incorrect initialization data"),
-            Self::AccountNotRentExempt => info!("Error: Account Not Rent Exempt"),
-            Self::AccountAlreadyInUse => info!("Error: Account Already In Use"),
-            Self::RequestingTooManyTokens => info!("Error: Requesting Too Many Tokens"),
-            Self::NonAdminClosureAttempt => info!("Error: Non Admin Closure Attempt"),
-            Self::NonClosableFaucetClosureAttempt => {
-                info!("Error: Non Closable Faucet Closure Attempt")
-            }
-            Self::Overflow => info!("Error: Overflow"),
-            Self::InvalidMint => info!("Error: Invalid Mint"),
-            Self::IncorrectMintAuthority => info!("Error: Incorrect Mint Authority"),
-        }
-    }
 }
 
 impl From<FaucetError> for ProgramError {
