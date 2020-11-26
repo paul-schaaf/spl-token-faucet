@@ -13,19 +13,25 @@ use solana_sdk::{
 use spl_token_faucet::*;
 
 // PUBKEY VALID TOKEN MINT
+// 4C4u5SHqXjBJvFz3rx2tFETeRjoJgWQ2w5ciYpn3MMVY
 const VALID_MINT_PUBKEY: Pubkey = Pubkey::new_from_array([
-    158, 191, 152, 115, 118, 236, 6, 196, 91, 157, 75, 167, 234, 145, 45, 94, 89, 179, 19, 193, 48,
-    42, 113, 129, 91, 230, 9, 89, 98, 201, 169, 18,
+    47, 104, 219, 101, 85, 194, 80, 47, 35, 174, 254, 156, 185, 64, 36, 249, 227, 189, 210, 216, 7,
+    241, 166, 242, 45, 176, 26, 40, 198, 193, 177, 231,
+]);
+
+// VALID TOKEN ACCOUNT PUBKEY
+// 6rC6BbigufiBZUbFgGpbeVRhpTUDj7XwYqnQU9jUBsaA
+const VALID_TOKEN_ACCOUNT_PUBKEY: Pubkey = Pubkey::new_from_array([
+    86, 228, 110, 220, 142, 131, 154, 18, 83, 141, 140, 155, 32, 188, 103, 97, 17, 202, 212, 98,
+    10, 61, 93, 10, 117, 76, 173, 43, 112, 121, 185, 139,
 ]);
 
 // SECOND MINT
+// 8YPF8izyYFqbcu3x9q8BpQ4dcU9PgNFGaVkLrqdzKJsL
 const SECOND_MINT_PUBKEY: Pubkey = Pubkey::new_from_array([
     29, 238, 175, 20, 22, 250, 227, 227, 197, 169, 134, 117, 26, 101, 94, 231, 186, 99, 233, 162,
     186, 46, 252, 212, 47, 23, 25, 152, 192, 22, 147, 248,
 ]);
-
-// TOKEN FAUCET ADDRESS
-// 6S1A9514Msgf4wVc1wNogNpEn2b1HKoYFHNR9VKQzYdR
 
 fn program_test() -> ProgramTest {
     let mut pc = ProgramTest::new(
@@ -340,7 +346,7 @@ async fn test_faucet_already_initialized() {
 async fn test_happy_flow_mint_tokens() {
     // GIVEN
     let token_mint_address = VALID_MINT_PUBKEY;
-    let token_account_address = Pubkey::new_unique();
+    let token_account_address = VALID_TOKEN_ACCOUNT_PUBKEY;
     let mut pc = program_test();
     pc.add_account_with_file_data(
         token_account_address,
@@ -392,7 +398,7 @@ async fn test_happy_flow_mint_tokens() {
 async fn test_mint_too_many_tokens() {
     // GIVEN
     let token_mint_address = VALID_MINT_PUBKEY;
-    let token_account_address = Pubkey::new_unique();
+    let token_account_address = VALID_TOKEN_ACCOUNT_PUBKEY;
     let mut pc = program_test();
     pc.add_account_with_file_data(
         token_account_address,
@@ -449,7 +455,7 @@ async fn test_mint_too_many_tokens() {
 async fn test_mint_happy_flow_admin_may_mint_too_many_tokens() {
     // GIVEN
     let token_mint_address = VALID_MINT_PUBKEY;
-    let token_account_address = Pubkey::new_unique();
+    let token_account_address = VALID_TOKEN_ACCOUNT_PUBKEY;
     let mut pc = program_test();
     pc.add_account_with_file_data(
         token_account_address,
@@ -505,7 +511,7 @@ async fn test_mint_happy_flow_admin_may_mint_too_many_tokens() {
 async fn test_mint_tokens_admin_included_but_didnt_sign() {
     // GIVEN
     let token_mint_address = VALID_MINT_PUBKEY;
-    let token_account_address = Pubkey::new_unique();
+    let token_account_address = VALID_TOKEN_ACCOUNT_PUBKEY;
     let mut pc = program_test();
     pc.add_account_with_file_data(
         token_account_address,
@@ -566,7 +572,7 @@ async fn test_mint_tokens_admin_included_but_didnt_sign() {
 async fn test_mint_tokens_impostor_admin_included_and_signed() {
     // GIVEN
     let token_mint_address = VALID_MINT_PUBKEY;
-    let token_account_address = Pubkey::new_unique();
+    let token_account_address = VALID_TOKEN_ACCOUNT_PUBKEY;
     let mut pc = program_test();
     pc.add_account_with_file_data(
         token_account_address,
@@ -628,7 +634,7 @@ async fn test_mint_tokens_impostor_admin_included_and_signed() {
 #[tokio::test]
 async fn test_mint_tokens_invalid_mint() {
     // GIVEN
-    let token_account_address = Pubkey::new_unique();
+    let token_account_address = VALID_TOKEN_ACCOUNT_PUBKEY;
     let mut pc = program_test();
     pc.add_account_with_file_data(
         token_account_address,
