@@ -9,7 +9,7 @@ use solana_program::program_error::ProgramError;
 pub enum FaucetInstruction {
     /// Initializes a faucet
     ///
-    /// 0. `[]` Token Mint Account
+    /// 0. `[]` Token Mint Account, mint authority must equal Program Derived Address
     /// 1. `[writable]` Faucet Account
     /// 2. `[]` Rent Sysvar
     /// 3. `[optional]` Admin Account
